@@ -1,31 +1,6 @@
-CREATE TABLE Personne (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    Nom VARCHAR(100) NOT NULL,
-    Prenom VARCHAR(100) NOT NULL,
-    Telephone VARCHAR(20) NOT NULL,
-    EstAdherent BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-CREATE TABLE Benevole (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    Date_Entree_Association DATE NOT NULL,
-    idPersonne BIGINT NOT NULL UNIQUE,
-
-    FOREIGN KEY (idPersonne) REFERENCES Personne(id)
-);
-
-CREATE TYPE Type_Depot AS ENUM (
+CREATE TYPE type_depot AS ENUM (
     'BOUTIQUE',
     'COLLECTE_DOMICILE'
-);
-
-CREATE TABLE Depot (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    DateDepot DATE NOT NULL,
-    TypeDepot Type_Depot NOT NULL,
-    idPersonne BIGINT NOT NULL,
-
-    FOREIGN KEY (idPersonne) REFERENCES personne(id)
 );
 
 CREATE TYPE type_etat_objet AS ENUM (
@@ -53,10 +28,56 @@ CREATE TYPE type_mode_paiement AS ENUM (
     'CHEQUE'
 );
 
+
+-- =========================
+-- TABLES PRINCIPALES
+-- =========================
+
+CREATE TABLE Personne (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Nom VARCHAR(100) NOT NULL,
+    Prenom VARCHAR(100) NOT NULL,
+    Telephone VARCHAR(20) NOT NULL,
+    EstAdherent BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE Benevole (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    Date_Entree_Association DATE NOT NULL,
+    idPersonne BIGINT NOT NULL UNIQUE,
+
+    FOREIGN KEY (idPersonne) REFERENCES Personne(id)
+);
+
+CREATE TABLE Depot (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    DateDepot DATE NOT NULL,
+    TypeDepot type_depot NOT NULL,
+    idPersonne BIGINT NOT NULL,
+
+    FOREIGN KEY (idPersonne) REFERENCES Personne(id)
+);
+
 CREATE TABLE Categorie (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    LibelleCategorie VARCHAR(50) NOT NULL
+    LibelleCategorie VARCHAR(50) NOT NULL UNIQUE
 );
+
+CREATE TABLE Competence (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    LibelleCompetence VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE Vente (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    DateVente DATE NOT NULL,
+    ModePaiement type_mode_paiement NOT NULL
+);
+
+
+-- =========================
+-- TABLES AVEC DEPENDANCES
+-- =========================
 
 CREATE TABLE Objet (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -84,8 +105,10 @@ CREATE TABLE Objet (
 CREATE TABLE Reparation (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     DateReparation DATE NOT NULL,
+
     DureeReparation DECIMAL(6,2) NOT NULL
         CHECK (DureeReparation > 0),
+
     ResultatReparation type_resultat_reparation NOT NULL,
 
     idBenevole BIGINT NOT NULL,
@@ -95,10 +118,26 @@ CREATE TABLE Reparation (
     FOREIGN KEY (idObjet) REFERENCES Objet(id)
 );
 
-CREATE TABLE Competence (
+CREATE TABLE Atelier (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    LibelleCompetence VARCHAR(100) NOT NULL UNIQUE
+    IntituleAtelier VARCHAR(255) NOT NULL,
+    DateAtelier DATE NOT NULL,
+
+    DureeAtelier DECIMAL(6,2) NOT NULL
+        CHECK (DureeAtelier > 0),
+
+    NombrePlaces INTEGER NOT NULL
+        CHECK (NombrePlaces > 0),
+
+    idBenevole BIGINT NOT NULL,
+
+    FOREIGN KEY (idBenevole) REFERENCES Benevole(id)
 );
+
+
+-- =========================
+-- TABLES D'ASSOCIATION
+-- =========================
 
 CREATE TABLE Possede (
     idBenevole BIGINT NOT NULL,
@@ -110,15 +149,10 @@ CREATE TABLE Possede (
     FOREIGN KEY (idCompetence) REFERENCES Competence(id)
 );
 
-CREATE TABLE Vente (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    DateVente DATE NOT NULL,
-    ModePaiement type_mode_paiement NOT NULL
-);
-
 CREATE TABLE LigneVente (
     idVente BIGINT NOT NULL,
     idObjet BIGINT NOT NULL,
+
     PrixReelPaye DECIMAL(10,2) NOT NULL
         CHECK (PrixReelPaye >= 0),
 
@@ -126,20 +160,6 @@ CREATE TABLE LigneVente (
 
     FOREIGN KEY (idVente) REFERENCES Vente(id),
     FOREIGN KEY (idObjet) REFERENCES Objet(id)
-);
-
-CREATE TABLE Atelier (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    IntituleAtelier VARCHAR(255) NOT NULL,
-    DateAtelier DATE NOT NULL,
-    DureeAtelier DECIMAL(6,2) NOT NULL
-        CHECK (DureeAtelier > 0),
-    NombrePlaces INTEGER NOT NULL
-        CHECK (NombrePlaces > 0),
-    
-    idBenevole BIGINT NOT NULL,
-
-    FOREIGN KEY (idBenevole) REFERENCES Benevole(id)
 );
 
 CREATE TABLE Inscription (
@@ -152,4 +172,4 @@ CREATE TABLE Inscription (
 
     FOREIGN KEY (idPersonne) REFERENCES Personne(id),
     FOREIGN KEY (idAtelier) REFERENCES Atelier(id)
-    );
+);
