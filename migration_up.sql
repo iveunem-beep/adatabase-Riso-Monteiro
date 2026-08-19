@@ -1,3 +1,4 @@
+
 CREATE TYPE type_depot AS ENUM (
     'BOUTIQUE',
     'COLLECTE_DOMICILE'
@@ -27,11 +28,6 @@ CREATE TYPE type_mode_paiement AS ENUM (
     'CARTE',
     'CHEQUE'
 );
-
-
--- =========================
--- TABLES PRINCIPALES
--- =========================
 
 CREATE TABLE Personne (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -73,11 +69,6 @@ CREATE TABLE Vente (
     DateVente DATE NOT NULL,
     ModePaiement type_mode_paiement NOT NULL
 );
-
-
--- =========================
--- TABLES AVEC DEPENDANCES
--- =========================
 
 CREATE TABLE Objet (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -133,11 +124,6 @@ CREATE TABLE Atelier (
 
     FOREIGN KEY (idBenevole) REFERENCES Benevole(id)
 );
-
-
--- =========================
--- TABLES D'ASSOCIATION
--- =========================
 
 CREATE TABLE Possede (
     idBenevole BIGINT NOT NULL,

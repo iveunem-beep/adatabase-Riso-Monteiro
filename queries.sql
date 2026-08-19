@@ -1,4 +1,4 @@
--- Combien d'objets avons-nous reçus le mois dernier, et quel poids total ?
+-- -- Combien d'objets avons-nous reçus le mois dernier, et quel poids total ?
 -- WITH mois AS (
 --     SELECT DISTINCT date_trunc('month', DateDepot) AS m
 --     FROM Depot
@@ -16,7 +16,7 @@
 
 
 
--- Quels objets sont actuellement en rayon, et depuis combien de temps ?
+-- -- Quels objets sont actuellement en rayon, et depuis combien de temps ?
 -- SELECT o.id,
 --        o.DesignationObjet,
 --        o.DateMiseRayon,
@@ -26,7 +26,7 @@
 -- ORDER BY jours_en_rayon DESC;
 
 
--- Quelle catégorie se vend le mieux ? Laquelle rapporte le plus ?
+-- -- Quelle catégorie se vend le mieux ? Laquelle rapporte le plus ?
 -- SELECT c.LibelleCategorie, count(*) as nb_vendus
 -- FROM LigneVente lv 
 -- JOIN OBJET o on lv.idObjet = o.id 
@@ -35,7 +35,7 @@
 -- ORDER BY nb_vendus DESC
 
 
--- Combien d'heures de bénévolat ont été consacrées à la réparation cette année ?
+-- -- Combien d'heures de bénévolat ont été consacrées à la réparation cette année ?
 -- SELECT b.id AS idBenevole,
 --        p.Nom,
 --        p.Prenom,
@@ -49,12 +49,40 @@
 -- GROUP BY b.id, p.Nom, p.Prenom
 -- ORDER BY taux_reussite_pct ASC;
 
--- Quelles personnes nous ont fait plus de trois dépôts ?
+-- -- Quelles personnes nous ont fait plus de trois dépôts ?
+-- SELECT p.Nom,
+--        p.Prenom,
+--        COUNT(d.id) AS nombre_depots
+-- FROM Personne p
+-- JOIN Depot d ON p.id = d.idPersonne
+-- GROUP BY p.id, p.Nom, p.Prenom
+-- HAVING COUNT(d.id) > 3;
 
--- Quel poids total avons-nous détourné de la déchetterie (tout ce qui n'est pas recyclé) ?
+-- -- Quel poids total avons-nous détourné de la déchetterie (tout ce qui n'est pas recyclé) ?
+-- SELECT SUM(PoidsObjet) AS poids_total
+-- FROM Objet
+-- WHERE StatutObjet <> 'RECYCLE';
 
--- Quel est le taux de présence réelle sur nos ateliers ?
+-- -- Quel est le taux de présence réelle sur nos ateliers ?
+-- SELECT
+--     COUNT(*) FILTER (WHERE Presence = TRUE) * 100.0
+--     / COUNT(*) AS taux_presence
+-- FROM Inscription
+-- WHERE Presence IS NOT NULL;
 
--- Quels bénévoles ont la compétence « électricité » et sont disponibles pour animer un atelier ?
+-- -- Quels bénévoles ont la compétence « électricité » et sont disponibles pour animer un atelier ?
 
--- Quels objets sont en rayon depuis plus de six mois et devraient être sortis ?
+-- SELECT p.Nom,
+--        p.Prenom
+-- FROM Personne p
+-- JOIN Benevole b ON p.id = b.idPersonne
+-- JOIN Possede po ON b.id = po.idBenevole
+-- JOIN Competence c ON po.idCompetence = c.id
+-- WHERE c.LibelleCompetence = 'electricite';
+
+-- -- Quels objets sont en rayon depuis plus de six mois et devraient être sortis ?
+-- SELECT DesignationObjet,
+--        DateMiseRayon
+-- FROM Objet
+-- WHERE StatutObjet = 'EN_RAYON'
+-- AND DateMiseRayon < CURRENT_DATE - INTERVAL '6 months';
